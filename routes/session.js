@@ -1,19 +1,20 @@
 module.exports = app => {
   app.get('/session', (req, res) => {
     const username = req.session.get("user");
-    const user = username ? username : "No User Found!";
+    const user = username ? username : null;
     res.bang(user);
   });
 
   app.post('/session', async (req, res) => {
     const { username } = req.parms;
     req.session.set("user", username);
-    res.bang(`logged in as ${username}`);
+    const user = req.get('user');
+    res.bang(user);
   });
 
   app.delete('/session', (req, res) => {
-    const username = req.session.get('user');
     req.session.set('user', null);
-    res.bang(`${username} logged out`);
+    const user = req.session.get('user');
+    res.bang(user);
   });
 }
