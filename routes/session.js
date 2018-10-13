@@ -8,7 +8,7 @@ module.exports = app => {
   app.post('/session', async (req, res) => {
     const { username } = req.parms;
     req.session.set("user", username);
-    const user = req.get('user');
+    const user = req.session.get('user');
     res.bang(user);
   });
 
