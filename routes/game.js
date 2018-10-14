@@ -1,9 +1,10 @@
-module.exports = (app, db) => {
+module.exports = (app, db, io) => {
   const Game = db.model('Game');
 
   app.post('/game', async (req, res) => {
     let game = new Game();
     game = await game.save();
+    io.sockets.emit("newGame", game);
     res.bang(game);
   });
 

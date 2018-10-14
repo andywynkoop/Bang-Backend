@@ -1,11 +1,14 @@
 const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
 require('./middlewares')(app);
 require('./models');
 require('./db')().then(db => {
-  require('./routes')(app, db);
+  require('./routes')(app, db, io);
   
   const port = process.env.PORT || 3001;
-  app.listen(port, () => {
+  
+  server.listen(port, () => {
     console.log(`Server listening on ${port}`);
   });
 })

@@ -4,9 +4,7 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   username: String,
   role: String,
-  bullets: Number,
-  character: { type: mongoose.Schema.ObjectId, ref: 'Character' },
-  cards: [{ type: mongoose.Schema.ObjectId, ref: 'Card' }]
+  bullets: { type: Number, default: 3 },
 });
 
 mongoose.model('User', userSchema);
