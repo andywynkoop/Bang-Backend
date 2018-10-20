@@ -2,6 +2,7 @@ const BangGame = require('../game/BangGame');
 module.exports = (app, db, io) => {
   const Game = db.model('Game');
   const User = db.model('User');
+  const Turn = db.model('Turn');
 
   const { currentUser, findUnfinishedGame, getPlayerObjectFromGame, getPlayerObjectFromPlayerArray, uniq } = require('./routeDbHelpers')(db);
 
@@ -24,10 +25,13 @@ module.exports = (app, db, io) => {
     game.started = true;
     let bangGame = new BangGame(game);
     bangGame.start();
-    let players = await bangGame.persistPlayerData();
+    let { players, turn } = await bangGame.persistPlayerData();
+    turn = new Turn({ game: turn.game._id, player: turn.player, playerIdx: turn.playerIdx });
+    turn = await turn.save();
     players = getPlayerObjectFromPlayerArray(players);
+    game.turn = turn._id;
     game = await game.save();
-    res.bang({ game, players });
+    res.bang({ game, turn, players });
   });
 
   app.post('/game', async (req, res) => {

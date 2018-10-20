@@ -1,10 +1,13 @@
+const BangCard = require('./BangCard');
 const Roles = require('./Roles');
 const Characters = require('./Characters');
+const BangTurn = require('./BangTurn');
 
 class BangGame {
-  constructor(mongooseGame, deck = [1,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,2,2,2,2,3,3,3,3]) {
+  constructor(mongooseGame, deck = BangCard.allCards()) {
     const { started, finished, players } = mongooseGame;
     Object.assign(this, { started, finished, players, deck });
+    this.playerIds = players.map(p => p._id);
   }
 
   start() {
@@ -13,6 +16,7 @@ class BangGame {
     this.assignPlayerCharacters();
     this.assignPlayerBullets();
     this.dealPlayerCards();
+    this.createFirstTurn();
   }
 
   shuffle(array) {
@@ -64,12 +68,29 @@ class BangGame {
   }
 
   dealPlayerCards() {
+    let shuffled = this.shuffle(this.deck);
     this.players.forEach(player => {
+      let cards = [];
       for (let i = 0; i < player.bullets; i++) {
-        player.cards = player.cards || [];
-        player.cards.push(this.deck.shift());
+        cards.push(shuffled.shift());
       }
+      player.cards = cards;
     });
+  }
+
+  createFirstTurn() {
+    let numPlayers = this.players.length;
+    let randIdx = Math.floor(Math.random() * numPlayers);
+    let startingPlayer = this.players[randIdx];
+    this.turn = new BangTurn({ game: this, player: startingPlayer, playerIdx: randIdx });
+  }
+
+  nextTurn() {
+    let prevIdx = this.turn.playerIdx;
+    nextIdx = prevIdx + 1;
+    if (nextIdx >= this.players.length) nextIdx = 0;
+    nextPlayer = this.players[nextIdx];
+    this.turn = new BangTurn({ game: this, player: nextPlayer, playerIdx: nextIdx });
   }
 
   async persistPlayerData() {
@@ -78,10 +99,9 @@ class BangGame {
       let _fn = () => {
         n++;
         if (n === this.players.length) {
-          resolve(this.players);
+          resolve({ players: this.players, turn: this.turn });
         } 
       }
-
       this.players.forEach(async player => {
         player = await player.save();
         _fn();

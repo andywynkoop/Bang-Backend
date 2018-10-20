@@ -7,7 +7,8 @@ const userSchema = new Schema({
   character: Object,
   bullets: { type: Number, default: 3 },
   game: { type: Schema.ObjectId, ref: 'Game' },
-  avatar: String
+  avatar: String,
+  cards: { type: Array, default: [] }
 });
 
 mongoose.model('User', userSchema);

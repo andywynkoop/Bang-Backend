@@ -3,3 +3,4 @@ require('./Game');
 require('./User');
 require('./Card');
 require('./Character');
+require('./Turn');

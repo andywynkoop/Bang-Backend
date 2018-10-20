@@ -1,5 +1,0 @@
-class BangDeck {
-  constructor(mongooseDeck) {
-    
-  }
-}
